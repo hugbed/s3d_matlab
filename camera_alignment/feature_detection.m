@@ -50,6 +50,13 @@ showMatchedFeatures(img_left, img_right, ...
     'montage','PlotOptions',{'ro','go','y--'});
 title('Point matches after outliers were removed');
 
+% display outliers
+figure;
+showMatchedFeatures(img_left, img_right, ...
+    matched_points_left(~inliers_indices, :), matched_points_right(~inliers_indices, :), ...
+    'montage','PlotOptions',{'ro','go','y--'});
+title('Rejected point matches outliers');
+
 % center the points
 x = inliers_points_left.Location;
 xp = inliers_points_right.Location;

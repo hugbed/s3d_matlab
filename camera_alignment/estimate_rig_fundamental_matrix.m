@@ -1,5 +1,7 @@
 function [f, inliers] = estimate_rig_fundamental_matrix(img1, img2)
 
+%todo: pass feature points instead of images
+
 [pts1, pts2, matched_pts1, matched_pts2, nb_pts] = get_points(img1, img2);
 
 figure;
@@ -11,8 +13,11 @@ title('Putatively Matched Points (Including Outliers)');
 pts1h = [pts1 ones(nb_pts, 1)]';
 pts2h = [pts2 ones(nb_pts, 1)]';
 
-distance_threshold = 0.01;
-nb_trials = 500;
+% how to choose these parameters?
+HEIGHT = size(img1, 1);
+WIDTH = size(img2, 2);
+distance_threshold = 0.01 * sqrt(WIDTH^2 + HEIGHT^2); % 1% of image diagonal
+nb_trials = 5000;
 confidence = 0.999;
 
 [f, params, inliers] = ransac(pts1h, pts2h, nb_pts, nb_trials, distance_threshold, confidence);
@@ -26,6 +31,12 @@ showMatchedFeatures(img1, img2, ...
     matched_pts1(inliers), matched_pts2(inliers), ...
     'montage','PlotOptions',{'ro','go','y--'});
 title('Point matches after outliers were removed');
+
+figure;
+showMatchedFeatures(img1, img2, ...
+    matched_pts1(~inliers), matched_pts2(~inliers), ...
+    'montage','PlotOptions',{'ro','go','y--'});
+title('Rejected matches as outliers');
 
 end
 
