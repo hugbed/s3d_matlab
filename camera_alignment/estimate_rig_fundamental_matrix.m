@@ -113,7 +113,7 @@ up = xp(1, :)';
 vp = xp(2, :)';
 
 % solve linear system of equations with pseudo-inverse
-A = [up - u, up, vp, -ones(length(up)), up.*v, -v.*vp]; %, u.*vp - up.*v];
+A = [up - u, up, vp, -ones(length(up), 1), up.*v, -v.*vp]; %, u.*vp - up.*v];
 x = pinv(A)*(vp - v);
 
 % decompose solution into parameters
