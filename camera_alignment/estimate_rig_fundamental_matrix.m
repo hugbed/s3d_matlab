@@ -1,46 +1,22 @@
-function [f, inliers] = estimate_rig_fundamental_matrix(img1, img2)
+function [f, params, inliers] = estimate_rig_fundamental_matrix(matched_pts1, matched_pts2, img_size)
 
-%todo: pass feature points instead of images
-
-[pts1, pts2, matched_pts1, matched_pts2, nb_pts] = get_points(img1, img2);
-
-figure;
-showMatchedFeatures(img1, img2, ...
-                    matched_pts1, matched_pts2, 'montage');
-title('Putatively Matched Points (Including Outliers)');
+[pts1, pts2, nb_pts] = center_pts(matched_pts1, matched_pts2, img_size);
 
 % to homogeneous
 pts1h = [pts1 ones(nb_pts, 1)]';
 pts2h = [pts2 ones(nb_pts, 1)]';
 
-% how to choose these parameters?
-HEIGHT = size(img1, 1);
-WIDTH = size(img2, 2);
-distance_threshold = 0.01 * sqrt(WIDTH^2 + HEIGHT^2); % 1% of image diagonal
+% tunable parameters
+% todo, should be able to tune tunable parameters
+distance_threshold = 0.01 * sqrt(img_size(1)^2 + img_size(2)^2); % 1% of image diagonal
 nb_trials = 5000;
 confidence = 0.999;
 
 [f, params, inliers] = ransac(pts1h, pts2h, nb_pts, nb_trials, distance_threshold, confidence);
 
-ch_y = params(1) % percent?
-a_z = rad2deg(params(2)) % degrees
-a_f = (params(3) + 1) * 100 % percent
-
-figure;
-showMatchedFeatures(img1, img2, ...
-    matched_pts1(inliers), matched_pts2(inliers), ...
-    'montage','PlotOptions',{'ro','go','y--'});
-title('Point matches after outliers were removed');
-
-figure;
-showMatchedFeatures(img1, img2, ...
-    matched_pts1(~inliers), matched_pts2(~inliers), ...
-    'montage','PlotOptions',{'ro','go','y--'});
-title('Rejected matches as outliers');
-
 end
 
-% todo: estimate without some numerically unstable parameters (cz, a_x_f)
+% todo: compare with/without numerically unstable parameters (e.g: cz, a_x_f)
 function [model, params, inliers] = ransac(pts1, pts2, nb_pts, nb_trials, threshold, confidence)
 
 min_nb_pts = 5;
@@ -86,32 +62,13 @@ assert(best_nb_inliers >= min_nb_pts);
 
 end
 
-function [pts1, pts2, matched_pts1, matched_pts2, nb_pts] = get_points(img_left, img_right)
+function [pts1, pts2, nb_pts] = center_pts(matched_pts1, matched_pts2, img_size)
 
-assert(size(img_left, 1) == size(img_right, 1));
-assert(size(img_left, 2) == size(img_right, 2));
-
-% detect features
-points_left = detectSURFFeatures(img_left);
-points_right = detectSURFFeatures(img_right);
-
-% extract features
-[features_left, points_left] = extractFeatures(img_left, points_left);
-[features_right, points_right] = extractFeatures(img_right, points_right);
-
-% match features
-featuresPairs = matchFeatures(features_left, features_right);
-
-% filter matched pairs
-matched_pts1 = points_left(featuresPairs(:, 1), :);
-matched_pts2 = points_right(featuresPairs(:, 2), :);
-
-% center points
+HEIGHT = img_size(1);
+WIDTH = img_size(2);
 x = matched_pts1.Location;
 xp = matched_pts2.Location;
 
-HEIGHT = size(img_left, 1);
-WIDTH = size(img_left, 2);
 pts1 = [x(:, 1) - WIDTH/2, x(:, 2) - HEIGHT/2];
 pts2 = [xp(:, 1) - WIDTH/2, xp(:, 2) - HEIGHT/2];
 
@@ -146,8 +103,6 @@ function model = compute_model(pts1, pts2)
 end
 
 function [model, params] = compute_model_with_params(pts1, pts2)
-
-% todo: verify this
 
 x = pts1;
 xp = pts2;
@@ -200,7 +155,7 @@ pfp = (pts2h' * f)';
 pfp = pfp .* pts1h;
 d = sum(pfp, 1) .^ 2;
 
-% do this too for sampson distance
+% additional step for sampson distance
 epl1 = f * pts1h;
 epl2 = f' * pts2h;
 d = d ./ (epl1(1,:).^2 + epl1(2,:).^2 + epl2(1,:).^2 + epl2(2,:).^2);
@@ -210,9 +165,7 @@ end
 function max_nb_trials = update_nb_trials(one_over_nb_pts, ...
                                           log_one_minus_conf, ...
                                           cur_nb_inliers, max_nb_trials)
-
-% to validate
-                                      
+                                     
 ratio_of_inliers = cur_nb_inliers * one_over_nb_pts;
 if ratio_of_inliers > 1 - eps('double')
   new_nb= 0;
