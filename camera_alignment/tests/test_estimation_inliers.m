@@ -2,7 +2,7 @@ close all;
 clear variables;
 
 % load dataset images
-dataset_name = 'Arch';
+dataset_name = 'Drive';
 [img_L, img_R] = load_dataset_inputs(dataset_name);
 
 % load dataset feature points

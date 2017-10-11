@@ -1,5 +1,5 @@
 % Compute orthogonality of rectified image from rectified width and height
-function Eo = orthogonality_error(h, w, H)
+function Eo = rectification_orthogonality(h, w, H)
 
 a = [w/2, 0, 1]';
 b = [w, h/2, 1]';

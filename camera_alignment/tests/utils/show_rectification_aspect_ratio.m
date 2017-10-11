@@ -1,9 +1,9 @@
-function show_orthogonality(h, w, H)
+function show_rectification_aspect_ratio(h, w, H)
 
-a = [w/2, 0, 1]';
-b = [w, h/2, 1]';
-c = [w/2, h, 1]';
-d = [0, h/2, 1]';
+a = [0, 0, 1]';
+b = [w, 0, 1]';
+c = [w, h, 1]';
+d = [0, h, 1]';
 
 a_bar = H*a;
 b_bar = H*b;

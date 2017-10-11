@@ -7,7 +7,7 @@ lines_R = epipolarLine(F, pts_L);
 border_pts_L = lineToBorderPoints(lines_L, size(img_L));
 border_pts_R = lineToBorderPoints(lines_R, size(img_R));
 
-[N, ~] = size(pts_L)
+[N, ~] = size(pts_L);
 
 colors = 255 * rand(N, 3);
 img_L_epilines = insertShape(img_L, 'Circle', [pts_L, 4*ones(N, 1)], 'LineWidth', 1, 'Color', colors);

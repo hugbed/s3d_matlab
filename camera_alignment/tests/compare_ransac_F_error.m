@@ -13,7 +13,7 @@ dataset_name = 'Drive';
 
 % fundamental matrix errors
 
-[Ef_mean, Ef_std] = fundamental_matrix_errors(pts_L, F, pts_R);
+[Ef_mean, Ef_std] = fundamental_matrix_errors(pts_L(inliers, :), F, pts_R(inliers, :));
 
 fprintf('Fundamental matrix error (should be 0):\n');
 fprintf(' Ef (mean) = %f\n', Ef_mean);

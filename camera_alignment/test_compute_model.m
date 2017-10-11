@@ -32,8 +32,8 @@ a_z = x(2);
 a_f = x(3);
 f_a_x = x(4);
 a_y_f = x(5);
-a_x_f = 0; %x(6);
-ch_z_f = 0; %x(7);
+a_x_f = x(6);
+ch_z_f = x(7);
 
 params = [ch_y, a_z, a_f, f_a_x, a_y_f, a_x_f, ch_z_f];
 

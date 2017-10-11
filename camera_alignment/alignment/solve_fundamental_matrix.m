@@ -9,9 +9,11 @@ up = xp(1, :)';
 vp = xp(2, :)';
 
 % solve linear system of equations with pseudo-inverse
-A = [ones(length(up), 1), u, vp, up - u, up.*v, v.*vp, u.*vp - up.*v];
+A = [ones(length(up), 1), up, vp, up - u, up.*v, v.*vp, u.*vp - up.*v];
 b = vp - v;
 x = pinv(A)*b;
+
+A*x - b
 
 % decompose solution into parameters
 f_a_x = -x(1);
