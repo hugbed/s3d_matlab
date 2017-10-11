@@ -14,10 +14,12 @@ dataset_name = 'Arch';
 % display proposed/computed matches
 figure;
 
+% our estimation
 subplot(2, 1, 1);
-showMatchedFeatures(img_L, img_R, pts_L, pts_R, 'montage');
-title('Suggested feature points');
-
-subplot(2, 1, 2);
 showMatchedFeatures(img_L, img_R, matched_pts1, matched_pts2, 'montage');
 title('Putatively Matched Points (Including Outliers)');
+
+% ground truth
+subplot(2, 1, 2);
+showMatchedFeatures(img_L, img_R, pts_L, pts_R, 'montage');
+title('Suggested Feature Points (Ground Truth)');

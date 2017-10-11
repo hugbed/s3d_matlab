@@ -1,4 +1,6 @@
 % todo: compare with/without numerically unstable parameters (e.g: cz, a_x_f)
+% todo: pass compute_model, distance functions as generic callbacks
+
 function [model, params, inliers] = ransac(pts1, pts2, nb_pts, nb_trials, threshold, confidence)
 
 min_nb_pts = 5;
@@ -40,7 +42,7 @@ end
 assert(best_nb_inliers >= min_nb_pts);
 
 % get model from best inliers
-[model, params] = compute_model_with_params(pts1(:, inliers), pts2(:, inliers));
+[model, params] = solve_fundamental_matrix(pts1(:, inliers), pts2(:, inliers));
 
 end
 
@@ -59,44 +61,13 @@ function [model, d] = sample_model(pts1, pts2, nb_pts, min_nb_pts, dist_func)
 rand_indices = unique_rand_indices(nb_pts, min_nb_pts);
 model = compute_model(pts1(:, rand_indices), pts2(:, rand_indices));
 
-d = dist_func(pts1, pts2, model);
+d = dist_func(pts1, model, pts2');
 
 end
 
 function model = compute_model(pts1, pts2)
 
-[model, ~] = compute_model_with_params(pts1, pts2);
-
-end
-
-function [model, params] = compute_model_with_params(pts1, pts2)
-
-x = pts1;
-xp = pts2;
-
-u = x(1, :)';
-v = x(2, :)';
-up = xp(1, :)';
-vp = xp(2, :)';
-
-% solve linear system of equations with pseudo-inverse
-A = [up - u, up, vp, -ones(length(up), 1), up.*v, -v.*vp]; %, u.*vp - up.*v];
-x = pinv(A)*(vp - v);
-
-% decompose solution into parameters
-ch_y = x(1); % percent?
-a_z = x(2); % rad2deg(x(2)) % degrees
-a_f = x(3); % (x(3) + 1) * 100 % percent
-f_a_x = x(4);
-a_y_f = x(5);
-a_x_f = 0; %x(6);
-ch_z_f = 0; %x(7);
-
-params = [ch_y, a_z, a_f, f_a_x, a_y_f, a_x_f, ch_z_f];
-
-model = [0,      -ch_z_f + a_y_f,  ch_y + a_z;
-         ch_z_f  -a_x_f,          -1 + a_f;
-        -ch_y     1,               -f_a_x];
+[model, ~] = solve_fundamental_matrix(pts1, pts2);
 
 end
 
@@ -116,15 +87,15 @@ end
 
 end
 
-function d = sampson_dist(pts1h, pts2h, f)
+function d = sampson_dist(pts1h, f, pts2h)
 
-pfp = (pts2h' * f)';
+pfp = (pts2h * f)';
 pfp = pfp .* pts1h;
 d = sum(pfp, 1) .^ 2;
 
 % additional step for sampson distance
 epl1 = f * pts1h;
-epl2 = f' * pts2h;
+epl2 = f' * pts2h';
 d = d ./ (epl1(1,:).^2 + epl1(2,:).^2 + epl2(1,:).^2 + epl2(2,:).^2);
 
 end

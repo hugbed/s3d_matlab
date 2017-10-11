@@ -13,5 +13,4 @@ plot(width + pts_R(:, 1), pts_R(:, 2), 'go'); hold on;
 line(border_pts_L(:,[1,3])', border_pts_L(:,[2,4])'); hold on;
 line(width + border_pts_R(:,[1,3])', border_pts_R(:,[2,4])'); hold on;
 
-
 end

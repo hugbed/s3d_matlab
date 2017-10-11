@@ -8,7 +8,7 @@ pts2h = [pts2 ones(nb_pts, 1)]';
 
 % tunable parameters
 % todo, should be able to tune tunable parameters
-distance_threshold = 10; %0.01 * sqrt(img_size(1)^2 + img_size(2)^2); % 1% of image diagonal
+distance_threshold = 0.01 * sqrt(img_size(1)^2 + img_size(2)^2); % 1% of image diagonal
 nb_trials = 5000;
 confidence = 0.999;
 

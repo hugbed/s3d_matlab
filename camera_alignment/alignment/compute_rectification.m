@@ -1,0 +1,19 @@
+function [H, Hp] = compute_rectification(alignment)
+
+ch_y = alignment(1);   % vertical
+a_z = alignment(2);    % roll
+a_f = alignment(3);    % zoom
+f_a_x = alignment(4);  % tiltOffset
+a_x_f = alignment(5);  % tiltKeystone
+a_y_f = alignment(6);  % panKeystone
+ch_z_f = alignment(7); % zParallaxDeformation
+
+H = [1.0,  ch_y, 0.0;
+    -ch_y, 1.0, 0.0;
+    -ch_z_f, 0, 1]';
+
+Hp = [1 - a_f, a_z + ch_y, 0;
+     -(a_z + ch_y), 1 - a_f, -f_a_x;
+      a_y_f - ch_z_f, -a_x_f, 1]';
+  
+end
