@@ -7,6 +7,9 @@ dataset_name = 'Drive';
 % load dataset feature points
 [F_truth, ~, ~, pts_L, pts_R, ~, ~] = load_dataset_outputs(dataset_name);
 
+% center points
+[pts_L, pts_R] = center_pts(pts_L, pts_R, size(img_L));
+
 % compute fundamental matrix
 [F, alignment] = solve_fundamental_matrix(pts_L', pts_R');
 

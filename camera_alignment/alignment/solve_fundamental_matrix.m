@@ -13,8 +13,6 @@ A = [ones(length(up), 1), up, vp, up - u, up.*v, v.*vp, u.*vp - up.*v];
 b = vp - v;
 x = pinv(A)*b;
 
-A*x - b
-
 % decompose solution into parameters
 f_a_x = -x(1);
 a_z = x(2);

@@ -17,12 +17,15 @@ dataset_name = 'Arch';
 % rectify images with epilines
 [img_L_rect, img_R_rect] = rectify_alignment(img_L_epilines, img_R_epilines, alignment);
 
+% [H, Hp] = compute_rectification(alignment);
+% [H1, H2] = estimateUncalibratedRectification(F, pts_L, pts_R, size(img_L))
+% [img_L_rect, img_R_rect] = rectifyStereoImages(img_L_epilines, img_R_epilines, H, Hp);
+
 % display epilines before rectification
 figure;
 subplot(2, 1, 1); imshow(horzcat(img_L_epilines, img_R_epilines)); title('Epilines Before Rectification');
 subplot(2, 1, 2); imshow(horzcat(img_L_rect, img_R_rect)); title('Epilines After Rectification');
-
-  
+ 
 fprintf('Results:\n');
 fprintf(' vertical (degrees) = %f\n', alignment(1) * 180 / pi);
 fprintf(' roll (degrees) = %f\n', alignment(2) * 180 / pi);

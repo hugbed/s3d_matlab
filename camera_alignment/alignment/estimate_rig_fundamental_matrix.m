@@ -15,18 +15,3 @@ confidence = 0.999;
 [f, params, inliers] = ransac(pts1h, pts2h, nb_pts, nb_trials, distance_threshold, confidence);
 
 end
-
-function [pts1, pts2, nb_pts] = center_pts(matched_pts1, matched_pts2, img_size)
-
-HEIGHT = img_size(1);
-WIDTH = img_size(2);
-x = matched_pts1;
-xp = matched_pts2;
-
-pts1 = [x(:, 1) - WIDTH/2, x(:, 2) - HEIGHT/2];
-pts2 = [xp(:, 1) - WIDTH/2, xp(:, 2) - HEIGHT/2];
-
-nb_pts = size(pts1, 1);
-assert(size(pts2, 1) == nb_pts);
-
-end
