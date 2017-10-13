@@ -2,14 +2,14 @@ close all;
 clear variables;
 
 % load dataset images
-dataset_name = 'Arch';
+dataset_name = 'Yard';
 [img_L, img_R] = load_dataset_inputs(dataset_name);
 
 % load dataset feature points
 [~, ~, ~, pts_L, pts_R, ~, ~] = load_dataset_outputs(dataset_name);
 
 % estimate fundamental matrix parameters and eliminate outliers
-[F, alignment] = solve_fundamental_matrix(pts_L', pts_R');
+[F, alignment] = estimate_rig_fundamental_matrix(pts_L, pts_R, size(img_L));
 
 % draw epilines on image
 [img_L_epilines, img_R_epilines] = draw_epilines(img_L, img_R, F, pts_L, pts_R);

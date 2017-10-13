@@ -1,6 +1,9 @@
 function [f, params, inliers] = estimate_rig_fundamental_matrix(matched_pts1, matched_pts2, img_size)
 
-[pts1, pts2, nb_pts] = center_pts(matched_pts1, matched_pts2, img_size);
+% disable center for now
+pts1 = matched_pts1;
+pts2 = matched_pts2;
+[nb_pts, ~] = size(pts1);
 
 % to homogeneous
 pts1h = [pts1 ones(nb_pts, 1)]';

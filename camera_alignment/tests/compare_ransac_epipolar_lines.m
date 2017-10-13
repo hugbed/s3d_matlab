@@ -2,7 +2,7 @@ close all;
 clear variables;
 
 % load dataset images
-dataset_name = 'Arch';
+dataset_name = 'Roof';
 [img_L, img_R] = load_dataset_inputs(dataset_name);
 
 % load dataset feature points
@@ -20,5 +20,5 @@ title('Epipolar Lines Estimation (Left/Right)');
 
 % ground truth
 subplot(2, 1, 2);
-show_epilines(img_L, img_R, F_truth', pts_L, pts_R);
+show_epilines(img_L, img_R, F_truth, pts_L, pts_R);
 title('Epipolar Lines Ground Truth (Left/Right)');

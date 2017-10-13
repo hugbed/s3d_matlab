@@ -2,7 +2,7 @@
 clear variables;
 
 % load dataset images
-dataset_name = 'Arch';
+dataset_name = 'Roof';
 [img_L, img_R] = load_dataset_inputs(dataset_name);
 
 % load dataset feature points
@@ -57,6 +57,7 @@ imshow(horzcat(img_L_rect_truth, img_R_rect_truth));
 title('Epilines After Rectification (Ground Truth)');
 
 % anaglyph
+% figure; imshow(stereoAnaglyph(img_L, img_R));
 % figure; imshow(stereoAnaglyph(img_L_rect, img_R_rect));
 % figure; imshow(stereoAnaglyph(img_L_rect_truth, img_R_rect_truth));
 
