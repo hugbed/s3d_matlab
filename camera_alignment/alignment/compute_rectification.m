@@ -19,10 +19,26 @@ ch_z_f = alignment(7); % zParallaxDeformation
 % experiment here
 H = [1.0,    ch_y, 0.0;
     -ch_y,   1.0,  0.0;
-    -ch_z_f, 0,    1.0]';
+    -ch_z_f, 0,    1.0];
 
 Hp = [1 - a_f,         a_z + ch_y,  0;
      -(a_z + ch_y),    1 - a_f,     f_a_x;
-      a_y_f - ch_z_f, -a_x_f,       1]';
+      a_y_f - ch_z_f, -a_x_f,       1];
+
+% only if rectification is not around center
+% H = H';
+% Hp = Hp';
+
+% rectification around center
+T = [1.0, 0.0, -256;
+     0.0, 1.0, -256;
+     0.0, 0.0, 1.0];
+
+T_inv= [1.0, 0.0, 256;
+        0.0, 1.0, 256;
+        0.0, 0.0, 1.0];
+
+H = (T_inv * H * T)';
+Hp = (T_inv * Hp * T)';
 
 end

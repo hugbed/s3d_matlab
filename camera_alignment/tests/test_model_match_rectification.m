@@ -1,35 +1,21 @@
-% close all;
+close all;
 clear variables;
 
 % load dataset images
-dataset_name = 'Yard';
+dataset_name = 'Arch';
 [img_L, img_R] = load_dataset_inputs(dataset_name);
 
 % load dataset feature points
-[~, ~, ~, pts_L, pts_R, ~, ~] = load_dataset_outputs(dataset_name);
+[pts_L_SURF, pts_R_SURF] = find_matches(img_L, img_R);
+pts_L = pts_L_SURF.Location;
+pts_R = pts_R_SURF.Location;
 
-% ground truth
-figure;
-showMatchedFeatures(img_L, img_R, pts_L, pts_R);
-title('Suggested Feature Points (Ground Truth)');
-
-% center pts
-T = [1, 0, -size(img_L, 1)/2;
-     0, 1, -size(img_L, 2)/2;
-     0, 0,  1];
-
-N = size(pts_L, 1);
-pts_L_H = (T*[pts_L ones(N, 1)]')';
-pts_R_H = (T*[pts_R ones(N, 1)]')';
-pts_L_centered = pts_L_H(:, 1:2);
-pts_R_centered = pts_R_H(:, 1:2);
+% our estimation
+showMatchedFeatures(img_L, img_R, pts_L, pts_R, 'montage');
+title('Putatively Matched Points (Including Outliers)');
 
 % estimate fundamental matrix parameters and eliminate outliers
-[F, alignment] = solve_fundamental_matrix(pts_L_centered', pts_R_centered');
-
-% decenter F
-F = T'*F*T;
-F = F / F(3, 2);
+[F, alignment] = solve_fundamental_matrix(pts_L', pts_R');
 
 % draw epilines on image
 [img_L_epilines, img_R_epilines] = draw_epilines(img_L, img_R, F, pts_L, pts_R);
@@ -54,13 +40,3 @@ fprintf(' tiltOffset (pixels) = %f\n', alignment(4));
 fprintf(' tiltKeystone (radians / m) = %f\n', alignment(5));
 fprintf(' panKeystone (radians / m) = %f\n', alignment(6));
 fprintf(' zParallaxDeformation (m/m) = %f\n', alignment(7));
-
-% load rgb images
-% dir = strcat('dataset/data/', dataset_name);
-% img_L_RGB = imread(strcat(dir, '/', dataset_name, '_L.bmp'));
-% img_R_RGB = imread(strcat(dir, '/', dataset_name, '_R.bmp'));
-% 
-% [H1, H2] = compute_rectification(alignment);
-
-% name = 'ArchMatlab';
-% save_dataset(name, img_L_RGB, img_R_RGB, pts_L, pts_R, F, H1, H2, img_L_rect, img_R_rect);

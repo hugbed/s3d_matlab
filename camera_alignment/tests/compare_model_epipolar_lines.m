@@ -9,7 +9,7 @@ dataset_name = 'Yard';
 [F_truth, ~, ~, pts_L, pts_R, ~, ~] = load_dataset_outputs(dataset_name);
 
 % estimate fundamental matrix parameters and eliminate outliers
-[F, params] = solve_fundamental_matrix(pts_L', pts_R');
+[F, params, ~, ~] = solve_fundamental_matrix(pts_L', pts_R');
 
 figure;
 

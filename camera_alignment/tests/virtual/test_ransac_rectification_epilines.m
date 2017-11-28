@@ -1,35 +1,20 @@
-% close all;
-clear variables;
+close all;
 
-% load dataset images
-dataset_name = 'Yard';
-[img_L, img_R] = load_dataset_inputs(dataset_name);
-
-% load dataset feature points
-[~, ~, ~, pts_L, pts_R, ~, ~] = load_dataset_outputs(dataset_name);
+% load dataset
+t = [0.5, 0.0, -0.01]';
+a = [0.0, 0.0, 0.0]';
+[C, R, t, pts_L, pts_R, img_size] = generate_virtual_dataset(t, a);
+white_img = 255 * ones(img_size(1), img_size(2), 'uint8');
+img_L = white_img;
+img_R = white_img;
 
 % ground truth
 figure;
 showMatchedFeatures(img_L, img_R, pts_L, pts_R);
 title('Suggested Feature Points (Ground Truth)');
 
-% center pts
-T = [1, 0, -size(img_L, 1)/2;
-     0, 1, -size(img_L, 2)/2;
-     0, 0,  1];
-
-N = size(pts_L, 1);
-pts_L_H = (T*[pts_L ones(N, 1)]')';
-pts_R_H = (T*[pts_R ones(N, 1)]')';
-pts_L_centered = pts_L_H(:, 1:2);
-pts_R_centered = pts_R_H(:, 1:2);
-
 % estimate fundamental matrix parameters and eliminate outliers
-[F, alignment] = solve_fundamental_matrix(pts_L_centered', pts_R_centered');
-
-% decenter F
-F = T'*F*T;
-F = F / F(3, 2);
+[F, alignment] = estimate_rig_fundamental_matrix(pts_L, pts_R);
 
 % draw epilines on image
 [img_L_epilines, img_R_epilines] = draw_epilines(img_L, img_R, F, pts_L, pts_R);
