@@ -10,22 +10,25 @@ dataset_name = 'Arch';
 pts_L = pts_L_SURF.Location;
 pts_R = pts_R_SURF.Location;
 
-% our estimation
+% matches with outliers
 showMatchedFeatures(img_L, img_R, pts_L, pts_R, 'montage');
 title('Putatively Matched Points (Including Outliers)');
 
 % estimate fundamental matrix parameters and eliminate outliers
-[F, alignment] = solve_fundamental_matrix(pts_L', pts_R');
+[F, alignment, inliers, T] = estimate_fundamental_matrix(pts_L, pts_R, 'Method', 'RANSAC', ...
+                                                         'Centered', 'true', 'ImgSize', size(img_L));
 
+% matches without outliers
+showMatchedFeatures(img_L, img_R, pts_L(inliers, :), pts_R(inliers, :), 'montage');
+title('Putatively Matched Points (Without Outliers)');
+                                                     
 % draw epilines on image
 [img_L_epilines, img_R_epilines] = draw_epilines(img_L, img_R, F, pts_L, pts_R);
 
 % rectify images with epilines
-[img_L_rect, img_R_rect] = rectify_alignment(img_L_epilines, img_R_epilines, alignment);
-
-% [H, Hp] = compute_rectification(alignment);
-% [H1, H2] = estimateUncalibratedRectification(F, pts_L, pts_R, size(img_L))
-% [img_L_rect, img_R_rect] = rectifyStereoImages(img_L_epilines, img_R_epilines, H, Hp);
+[H, Hp] = compute_rectification(alignment, T);
+img_L_rect = rectify(img_L_epilines, H);
+img_R_rect = rectify(img_R_epilines, Hp);
 
 % display epilines before rectification
 figure;

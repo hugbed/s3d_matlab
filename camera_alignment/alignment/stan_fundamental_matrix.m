@@ -1,4 +1,4 @@
-function [F, alignment] = solve_fundamental_matrix(pts1, pts2)
+function [F, alignment] = stan_fundamental_matrix(pts1, pts2)
 % rename solve_stan_alignment
 
 x = pts1;
@@ -26,5 +26,21 @@ c_z_f = x(7);
 alignment = [ch_y, a_z, a_f, f_a_x, a_y_f, a_x_f, c_z_f];
 
 F = alignment_to_fundamental_matrix(alignment);
+
+end
+
+function F = alignment_to_fundamental_matrix(alignment)
+
+ch_y = alignment(1);
+a_z = alignment(2);
+a_f = alignment(3);
+f_a_x = alignment(4);
+a_y_f = alignment(5);
+a_x_f = alignment(6);
+c_z_f = alignment(7);
+
+F = [0,      -c_z_f + a_y_f,  ch_y + a_z;
+     c_z_f,  -a_x_f,          -1 + a_f;
+    -ch_y,    1,               -f_a_x];
 
 end

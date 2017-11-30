@@ -2,11 +2,15 @@ close all;
 clear variables;
 
 % load dataset images
-dataset_name = '2';
-[C, R, t, pts_L, pts_R] = load_virtual_dataset(dataset_name);
+dataset_name = 'Arch';
+[img_L, img_R] = load_dataset_inputs(dataset_name);
+
+% load dataset feature points
+[F_truth, ~, ~, pts_L, pts_R, ~, ~] = load_dataset_outputs(dataset_name);
 
 % compute fundamental matrix
-[F, alignment] = solve_fundamental_matrix(pts_L', pts_R');
+[F, alignment] = estimate_fundamental_matrix(pts_L, pts_R, 'Method', 'STAN', ...
+                                             'Centered', 'true', 'ImgSize', size(img_L));
 
 fprintf('Results:\n');
 fprintf(' vertical (degrees) = %f\n', alignment(1) * 180 / pi);

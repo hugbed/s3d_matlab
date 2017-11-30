@@ -137,7 +137,7 @@ pts2(3, :) = 1;
 
 if strcmp(method, 'STAN')
   if nb_pts >= 7
-    [F, alignment] = solve_fundamental_matrix(pts1, pts2);
+    [F, alignment] = stan_fundamental_matrix(pts1, pts2);
     inliers(:) = true(1, nb_pts);
   else
     % error
@@ -151,11 +151,11 @@ else
   end
   
   % if no error
-  [F, alignment] = solve_fundamental_matrix(pts1(:, inliers), pts2(:, inliers));
+  [F, alignment] = stan_fundamental_matrix(pts1(:, inliers), pts2(:, inliers));
 end
 end
 
 function F = compute_fundamental_matrix(pts1, pts2)
-[F, ~] = solve_fundamental_matrix(pts1, pts2);
+[F, ~] = stan_fundamental_matrix(pts1, pts2);
 end
 

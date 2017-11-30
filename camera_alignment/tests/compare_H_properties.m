@@ -13,8 +13,9 @@ H_truth = H_truth'; % for some reasons... (to give the correct results)
 Hp_truth = Hp_truth'; % for some reasons... (to give the correct results)
 
 % compute rectification
-[F, alignment] = solve_fundamental_matrix(pts_L', pts_R');
-[H, Hp] = compute_rectification(alignment);
+[F, alignment, inliers, T] = estimate_fundamental_matrix(pts_L, pts_R, 'Method', 'STAN', ...
+                                                         'Centered', 'true', 'ImgSize', size(img_L));
+[H, Hp] = compute_rectification(alignment, T);
 
 % rectify images
 img1_rectified = rectify(img_L, H);

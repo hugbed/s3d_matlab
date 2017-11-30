@@ -1,4 +1,4 @@
-close all;
+% close all;
 clear variables;
 
 % load dataset images
@@ -9,8 +9,9 @@ dataset_name = 'Arch';
 [F_truth, H_truth, Hp_truth, pts_L, pts_R, img_L_rect_truth, img_R_rect_truth] = load_dataset_outputs(dataset_name);
 
 % compute rectification
-[F, alignment] = solve_fundamental_matrix(pts_L', pts_R');
-[H, Hp] = compute_rectification(alignment);
+[F, alignment, inliers, T] = estimate_fundamental_matrix(pts_L, pts_R, 'Method', 'STAN', ...
+                                                         'Centered', 'true', 'ImgSize', size(img_L));
+[H, Hp] = compute_rectification(alignment, T);
 
 % compute rectification error
 [Er_mean, Er_std] = rectification_error(pts_L, pts_R, H', Hp');

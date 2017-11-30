@@ -22,7 +22,9 @@ title('Suggested Feature Points (Ground Truth)');
 [img_L_epilines, img_R_epilines] = draw_epilines(img_L, img_R, F, pts_L, pts_R);
 
 % rectify images with epilines
-[img_L_rect, img_R_rect] = rectify_centered_alignment(img_L_epilines, img_R_epilines, alignment, T, T);
+[H, Hp] = compute_rectification(alignment, T);
+img_L_rect = rectify(img_L_epilines, H);
+img_R_rect = rectify(img_R_epilines, Hp);
 
 % [H, Hp] = compute_rectification(alignment);
 % [H1, H2] = estimateUncalibratedRectification(F, pts_L, pts_R, size(img_L))

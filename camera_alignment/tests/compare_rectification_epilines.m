@@ -8,20 +8,14 @@ dataset_name = 'Roof';
 % load dataset feature points
 [F_truth, H_truth, Hp_truth, pts_L, pts_R, ~, ~] = load_dataset_outputs(dataset_name);
 
-% center points ?
-% [pts_L_centered, pts_R_centered] = center_pts(pts_L, pts_R, size(img_L));
-
 % estimate fundamental matrix parameters and eliminate outliers
-[F, alignment] = solve_fundamental_matrix(pts_L', pts_R');
-[H, Hp] = compute_rectification(alignment);
+[F, alignment, inliers, T] = estimate_fundamental_matrix(pts_L, pts_R, 'Method', 'STAN', ...
+                                                         'Centered', 'true', 'ImgSize', size(img_L));
+[H, Hp] = compute_rectification(alignment, T);
 
 % compute rectification error
 [Er_mean, Er_std] = rectification_error(pts_L, pts_R, H, Hp);
 [Er_mean_truth, Er_std_truth] = rectification_error(pts_L, pts_R, H_truth, Hp_truth);
-
-% figure; show_rectification_vertical(pts_L, pts_R, H, Hp);
-% figure; show_rectification_vertical(pts_L, pts_R, H_truth, Hp_truth);
-
 
 fprintf('Rectification error (vertical disparity remaining):\n');
 fprintf(' Er (mean) = %f\n', Er_mean);
@@ -44,10 +38,6 @@ img_R_rect_truth = rectify(img_R_epilines_truth, Hp_truth);
 % display epilines before rectification
 figure;
 
-% subplot(3, 1, 1);
-% imshow(horzcat(img_L_epilines, img_R_epilines));
-% title('Epilines Before Rectification');
-
 subplot(2, 1, 1);
 imshow(horzcat(img_L_rect, img_R_rect));
 title('Epilines After Rectification');
@@ -55,9 +45,4 @@ title('Epilines After Rectification');
 subplot(2, 1, 2);
 imshow(horzcat(img_L_rect_truth, img_R_rect_truth));
 title('Epilines After Rectification (Ground Truth)');
-
-% anaglyph
-% figure; imshow(stereoAnaglyph(img_L, img_R));
-% figure; imshow(stereoAnaglyph(img_L_rect, img_R_rect));
-% figure; imshow(stereoAnaglyph(img_L_rect_truth, img_R_rect_truth));
 

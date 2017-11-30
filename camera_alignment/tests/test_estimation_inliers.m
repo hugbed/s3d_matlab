@@ -9,7 +9,8 @@ dataset_name = 'Drive';
 [~, ~, ~, pts_L, pts_R, ~, ~] = load_dataset_outputs(dataset_name);
 
 % estimate fundamental matrix parameters and eliminate outliers
-[f, params, inliers] = estimate_rig_fundamental_matrix(pts_L, pts_R, size(img_L));
+[F, alignment, inliers] = estimate_fundamental_matrix(pts_L, pts_R, 'Method', 'RANSAC', ...
+                                                     'Centered', 'true', 'ImgSize', size(img_L));
 
 % show all feature points
 figure;
