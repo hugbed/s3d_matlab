@@ -1,12 +1,24 @@
-function [F, inliers] = estimate_rig_fundamental_matrix(matched_pts1, matched_pts2, img_size)
+function [F, params, inliers, T, Tp] = estimate_rig_fundamental_matrix(matched_pts1, matched_pts2, img_size)
 
 pts1 = matched_pts1;
 pts2 = matched_pts2;
 [nb_pts, ~] = size(pts1);
 
+% centered pts
+T = [1, 0, -img_size(1)/2;
+     0, 1, -img_size(2)/2;
+     0, 0,  1];
+ 
+Tp = [1, 0, -img_size(1)/2;
+      0, 1, -img_size(2)/2;
+      0, 0,  1];
+
+pts_1_centered = transform_pts(pts1, T);
+pts_2_centered = transform_pts(pts2, Tp);
+
 % to homogeneous
-pts1h = [pts1 ones(nb_pts, 1)]';
-pts2h = [pts2 ones(nb_pts, 1)]';
+pts1h = [pts_1_centered ones(nb_pts, 1)]';
+pts2h = [pts_2_centered ones(nb_pts, 1)]';
 
 % tunable parameters
 % todo, should be able to tune tunable parameters
@@ -19,6 +31,9 @@ confidence = 0.99;
                       @compute_fundamental_matrix, @sampson_distance, 5);
 
 [F, params] = solve_fundamental_matrix(pts1h(:, inliers), pts2h(:, inliers));
+
+% decenter F
+F = denormalize_F(F, T, Tp);
 
 end
 

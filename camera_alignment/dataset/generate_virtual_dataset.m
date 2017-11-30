@@ -51,6 +51,12 @@ x(1:2, :)  = x(1:2, :) ./ x(3, :);
 xp = C*H*X';
 xp(1:2, :)  = xp(1:2, :) ./ xp(3, :);
 
+noise_std = 2;
+x_noise = sqrt(noise_std)*randn(nb_pts, 2);
+xp_noise = sqrt(noise_std)*randn(nb_pts, 2);
+x(1:2, :) = x(1:2, :) + x_noise';
+xp(1:2, :) = xp(1:2, :) + xp_noise';
+
 % filter x oustide image
 good = x < width & x < height & x >= 0;
 good = good(1, :) & good(2, :) & good(3, :);

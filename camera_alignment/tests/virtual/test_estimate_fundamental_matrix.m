@@ -1,8 +1,9 @@
 close all;
+clear variables;
 
 % load dataset
-t = [0.0, 0.1,-0.0]';
-a = [0.0, 0.0,  0.0]'; % tilt, pitch, roll
+t = [0.0, 0.1, -0.1]';
+a = [0.0, 0.1,  0.1]'; % tilt, pitch, roll
 [C, R, t, pts_L, pts_R, img_size] = generate_virtual_dataset(1, t, a);
 white_img = 255 * ones(img_size(1), img_size(2), 'uint8');
 img_L = white_img;
@@ -14,13 +15,14 @@ showMatchedFeatures(img_L, img_R, pts_L, pts_R);
 title('Suggested Feature Points (Ground Truth)');
 
 % estimate fundamental matrix parameters and eliminate outliers
-[F, alignment, inliers, T, Tp] = estimate_centered_rig_fundamental_matrix(pts_L, pts_R, size(img_L));
+[F, alignment, inliers, T] = estimate_fundamental_matrix(pts_L, pts_R, 'Method', 'STAN', ...
+                                                         'Centered', 'true', 'ImgSize', size(img_L));
 
 % draw epilines on image
 [img_L_epilines, img_R_epilines] = draw_epilines(img_L, img_R, F, pts_L, pts_R);
 
 % rectify images with epilines
-[img_L_rect, img_R_rect] = rectify_centered_alignment(img_L_epilines, img_R_epilines, alignment, T, Tp);
+[img_L_rect, img_R_rect] = rectify_centered_alignment(img_L_epilines, img_R_epilines, alignment, T, T);
 
 % [H, Hp] = compute_rectification(alignment);
 % [H1, H2] = estimateUncalibratedRectification(F, pts_L, pts_R, size(img_L))
