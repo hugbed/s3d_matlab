@@ -2,9 +2,10 @@ close all;
 clear variables;
 
 % load dataset
-t = [0.0, 0.1, -0.1]';
-a = [0.0, 0.1,  0.1]'; % tilt, pitch, roll
-[C, R, t, pts_L, pts_R, img_size] = generate_virtual_dataset(1, t, a);
+t = [0.0, 0.0, 0.0]';
+a = [0.0, 0.0, 0.0]'; % tilt, pitch, roll
+noise_std = 2;
+[C, R, t, pts_L, pts_R, img_size] = generate_virtual_dataset(1, t, a, noise_std);
 white_img = 255 * ones(img_size(1), img_size(2), 'uint8');
 img_L = white_img;
 img_R = white_img;

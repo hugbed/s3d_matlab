@@ -37,7 +37,7 @@ function [pts1, pts2, method, distance_function, ...,
             = parse_inputs(matched_pts1, matched_pts2, varargin)
 
 % should add LMedS, LTS, MSAC
-expectedMethods = {'RANSAC', 'STAN'};
+expectedMethods = {'RANSAC', 'MSAC', 'STAN'};
 expectedBoolean = {'true', 'false'};
 
 defaultMethod = 'RANSAC';
@@ -45,7 +45,7 @@ defaultCentered = 'false';
 defaultImgSize = [-1, -1];
 defaultNbTrials = 500;
 defaultDistanceThreshold = 0.01;
-defaultConfidence = 0.99;
+defaultConfidence = 99;
 
 p = inputParser;
 addOptional(p, 'Method', defaultMethod, @(x) any(validatestring(x,expectedMethods)));
@@ -66,7 +66,7 @@ img_size = p.Results.ImgSize;
 distance_function = p.Results.DistanceFunction;
 nb_trials = p.Results.MaxNbTrials;
 distance_treshold = p.Results.DistanceThreshold;
-confidence = p.Results.Confidence;
+confidence = p.Results.Confidence / 100;
 
 if centered == true && isequal(img_size, defaultImgSize)
     error('ImgSize must be set if "Centered" is set to true');
@@ -147,7 +147,11 @@ else
     case 'RANSAC'
       [~, inliers] = ransac(pts1, pts2, nb_pts, nb_trials, ...
                       distance_threshold, confidence, ...
-                      @compute_fundamental_matrix, distance_function, 5);
+                      @compute_fundamental_matrix, distance_function, 5); % todo: this min_nb_pts is hardcoded!
+    case 'MSAC'
+      [inliers] = msac(pts1, pts2, nb_pts, nb_trials, ...
+                       distance_threshold, confidence, ...
+                       @compute_fundamental_matrix, distance_function, 5);
   end
   
   % if no error
@@ -159,3 +163,46 @@ function F = compute_fundamental_matrix(pts1, pts2)
 [F, ~] = stan_fundamental_matrix(pts1, pts2);
 end
 
+function [inliers] = msac(pts1h, pts2h, nb_pts, nb_trials, confidence, distance_threshold, ...
+  compute_fundamental_matrix, distance_function, sample_size)
+
+inliers = false(1, nb_pts);
+if nb_pts >= 7
+    
+    ransacParams.maxNumTrials = nb_trials;
+    ransacParams.confidence = confidence;
+    ransacParams.maxDistance = distance_threshold;
+    ransacParams.sampleSize = sample_size;
+    ransacParams.recomputeModelFromInliers = false;
+    
+    ransacFuncs.checkFunc = @checkTForm;
+    ransacFuncs.fitFunc = @computeTForm;
+    ransacFuncs.evalFunc = @evaluateTFormSampson;
+  
+    points = cat(3, pts1h', pts2h');
+    [isFound, ~, inliers] = vision.internal.ransac.msac(...
+        points, ransacParams, ransacFuncs);
+    
+    if ~isFound 
+        error('Not enough inliers');
+    end
+else
+    error('Not enough points');
+end
+end
+
+function F = computeTForm(points)
+points1 = points(:,:,1)';
+points2 = points(:,:,2)';
+F = compute_fundamental_matrix(points1, points2);
+end
+
+function dis = evaluateTFormSampson(F, points)
+points1 = points(:, :, 1)';
+points2 = points(:, :, 2)';
+dis = sampson_distance(points1, F, points2')';
+end
+
+function tf = checkTForm(tform)
+tf = all(isfinite(tform(:)));
+end

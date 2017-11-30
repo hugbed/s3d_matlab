@@ -1,6 +1,3 @@
-% todo: compare with/without numerically unstable parameters (e.g: cz, a_x_f)
-% todo: pass compute_model, distance functions as generic callbacks
-
 function [best_model, best_inliers] = ransac(pts1, pts2, nb_pts, nb_trials, threshold, confidence, ...
                                              compute_model_func, dist_func, min_nb_pts)
 

@@ -1,4 +1,4 @@
-function [ C, R, t, pts_L, pts_R, img_size ] = generate_virtual_dataset(baseline, t, a)
+function [ C, R, t, pts_L, pts_R, img_size ] = generate_virtual_dataset(baseline, t, a, noise_std)
 
 nb_pts = 200;
 
@@ -51,7 +51,7 @@ x(1:2, :)  = x(1:2, :) ./ x(3, :);
 xp = C*H*X';
 xp(1:2, :)  = xp(1:2, :) ./ xp(3, :);
 
-noise_std = 2;
+% add gaussian noise to image points
 x_noise = sqrt(noise_std)*randn(nb_pts, 2);
 xp_noise = sqrt(noise_std)*randn(nb_pts, 2);
 x(1:2, :) = x(1:2, :) + x_noise';
