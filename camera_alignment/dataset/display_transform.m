@@ -10,7 +10,7 @@ X = L * R * [1 0 0]';
 Y = L * R * [0 1 0]';
 Z = L * R * [0 0 1]';
 
-T = -R*T;
+% T = -R*T;
 
 quiver3(T(1), T(2), T(3), X(1), X(2), X(3), 'r'); hold on;
 quiver3(T(1), T(2), T(3), Y(1), Y(2), Y(3), 'g'); hold on;
