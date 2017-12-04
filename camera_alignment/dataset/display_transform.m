@@ -1,6 +1,7 @@
 function display_transform(R, T)
 
 L = 0.5;
+R = R';
 
 % quiver3(0, 0, 0, L, 0, 0, 'r'); hold on;
 % quiver3(0, 0, 0, 0, L, 0, 'g'); hold on;

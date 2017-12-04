@@ -44,7 +44,7 @@ defaultMethod = 'RANSAC';
 defaultCentered = 'false';
 defaultImgSize = [-1, -1];
 defaultNbTrials = 500;
-defaultDistanceThreshold = 0.01;
+defaultDistanceThreshold = 1.96 * 2;
 defaultConfidence = 99;
 
 p = inputParser;
@@ -147,11 +147,11 @@ else
     case 'RANSAC'
       [~, inliers] = ransac(pts1, pts2, nb_pts, nb_trials, ...
                       distance_threshold, confidence, ...
-                      @compute_fundamental_matrix, distance_function, 5); % todo: this min_nb_pts is hardcoded!
+                      @compute_fundamental_matrix, distance_function, 7); % todo: this min_nb_pts is hardcoded!
     case 'MSAC'
       [inliers] = msac(pts1, pts2, nb_pts, nb_trials, ...
                        distance_threshold, confidence, ...
-                       @compute_fundamental_matrix, distance_function, 5);
+                       @compute_fundamental_matrix, distance_function, 7);
   end
   
   % if no error
