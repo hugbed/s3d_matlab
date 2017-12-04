@@ -2,9 +2,9 @@ close all;
 clear variables;
 
 % load dataset
-t = [-0.2, 0.0, 0.0]';
-a = [0.0, 0.0, 0.01]'; % tilt, pitch, roll
-noise_std = 0;
+t = [0.1, 0.0, 0.0]';
+a = [0.1, 0.0, 0.0]'; % roll, pitch, tilt; (ZYX)
+noise_std = 1;
 [F_gold, pts_L, pts_R, pts_L_noise, pts_R_noise, img_size] = generate_virtual_dataset(0.5, t, a, noise_std);
 white_img = 255 * ones(img_size(1), img_size(2), 'uint8');
 img_L = white_img;
