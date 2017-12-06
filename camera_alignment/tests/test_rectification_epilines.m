@@ -14,13 +14,8 @@ showMatchedFeatures(img_L, img_R, pts_L, pts_R);
 title('Suggested Feature Points (Ground Truth)');
 
 % estimate fundamental matrix parameters and eliminate outliers
-[F, alignment, inliers, T] = estimate_fundamental_matrix(pts_L, pts_R, 'Method', 'MSAC', ...
+[F, alignment, inliers, T] = estimate_fundamental_matrix(pts_L, pts_R, 'Method', 'LMedS', ...
                                                          'Centered', 'true', 'ImgSize', size(img_L));
-
-
-
-size(pts_L, 1)
-sum(inliers)
 
 % draw epilines on image
 [img_L_epilines, img_R_epilines] = draw_epilines(img_L, img_R, F, pts_L(inliers, :), pts_R(inliers, :));

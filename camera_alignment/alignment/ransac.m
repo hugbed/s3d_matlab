@@ -16,7 +16,7 @@ one_over_nb_pts = 1 / nb_pts;
 
 while cur_nb_trials < max_nb_trials
     % compute distances with minimum number of samples
-    [~, d, ~] = sample_model(pts1, pts2, nb_pts, min_nb_pts, compute_model_func, dist_func);
+    [~, d, sample_indices] = sample_model(pts1, pts2, nb_pts, min_nb_pts, compute_model_func, dist_func);
 
     % find inliers
     [cur_inliers, cur_nb_inliers] = find_inliers(d, nb_pts, threshold);
@@ -25,6 +25,7 @@ while cur_nb_trials < max_nb_trials
         %  replace last best
         best_nb_inliers = cur_nb_inliers;
         best_inliers = cur_inliers;
+        best_sample_indices = sample_indices;
 
         % Update the number of trials
         max_nb_trials = update_nb_trials(one_over_nb_pts, log_one_minus_conf, ...
@@ -78,7 +79,7 @@ ratio_of_inliers = cur_nb_inliers * one_over_nb_pts;
 if ratio_of_inliers > 1 - eps('double')
   new_nb= 0;
 else
-  ratio = ratio_of_inliers^5;
+  ratio = ratio_of_inliers^7;
   if ratio > eps(1)
     log_one_minus_ratio = log(1 - ratio);
     new_nb = ceil(log_one_minus_conf / log_one_minus_ratio);

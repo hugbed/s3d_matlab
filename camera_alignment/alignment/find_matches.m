@@ -4,6 +4,9 @@ function [matched_pts1, matched_pts2] = find_matches(img1, img2)
 points1 = detectSURFFeatures(img1);
 points2 = detectSURFFeatures(img2);
 
+points1 = points1.selectStrongest(500);
+points2 = points2.selectStrongest(500);
+
 % extract features
 [features1, points1] = extractFeatures(img1, points1);
 [features2, points2] = extractFeatures(img2, points2);
