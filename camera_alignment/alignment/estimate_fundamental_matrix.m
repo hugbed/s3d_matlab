@@ -16,7 +16,7 @@ end
   pts1, pts2, method, nb_trials, ...
   distance_function, distance_threshold, confidence);
 
-[F, alignment, inliers] = guided_matching(alignment, inliers, pts1, pts2, 2*distance_threshold);
+% [F, alignment, inliers] = guided_matching(alignment, inliers, pts1, pts2, 2*distance_threshold);
 
 if centered
   F = decenter_F(F, T);
