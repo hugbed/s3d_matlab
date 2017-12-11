@@ -47,7 +47,7 @@ expected_std = 1;
 defaultMethod = 'LMedS';
 defaultCentered = 'false';
 defaultImgSize = [-1, -1];
-defaultNbTrials = 5000;
+defaultNbTrials = 500;
 defaultDistanceThreshold = sqrt(3.84*expected_std^2); % 95% inlier (see [Hartley])
 defaultConfidence = 99;
 
