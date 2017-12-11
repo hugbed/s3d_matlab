@@ -27,19 +27,9 @@ subplot(2, 2, 2);
 showMatchedFeatures(img_L, img_R, pts_L_noise(1:nb_outliers, :), pts_R_noise(1:nb_outliers, :));
 title('Outliers');
 
-% first estimate with real fundamental matrix
-[F, inliers] = estimateFundamentalMatrix(pts_L_noise, pts_R_noise, 'Method', 'LMedS');
-
-sum(inliers)
-
 % estimate fundamental matrix parameters from noisy points and eliminate outliers
 [F, alignment, inliers, T] = estimate_fundamental_matrix(pts_L_noise, pts_R_noise, 'Method', 'LMedS', ...
                                                          'Centered', 'true', 'ImgSize', size(img_L));
-
-sum(inliers)
-                                                    
-% alignment = zeros(1, 7);
-% T = eye(3);
 
 % uncaught outliers
 nb_uncaught_outliers = sum(inliers(1:nb_outliers))
