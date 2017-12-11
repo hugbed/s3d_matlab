@@ -5,9 +5,9 @@ H = eye(7);
 Q = 0.00001 * eye(7);
 R = diag(sigma);
 
-% prediction
-x = F*x;
-P = F*P*F' + Q;
+% prediction (not necessary with identity F, H, Q)
+% x = F*x;
+% P = F*P*F' + Q;
 
 % update (innovation)
 y = z - H*x;
