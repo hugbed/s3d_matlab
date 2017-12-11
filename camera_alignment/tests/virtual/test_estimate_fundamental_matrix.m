@@ -3,9 +3,12 @@ clear variables;
 
 % load dataset
 t = [0.1, 0.0, 0.0]';
-a = [0.1, 0.0, 0.0]'; % roll, pitch, tilt; (ZYX)
+a = [0.1, 0.0, 0.1]'; % roll, pitch, tilt; (ZYX)
+nb_pts = 200;
 noise_std = 1;
-[F_gold, pts_L, pts_R, pts_L_noise, pts_R_noise, img_size] = generate_virtual_dataset(0.5, t, a, noise_std);
+percent_outliers = 0.2;
+nb_outliers = floor(percent_outliers*nb_pts);
+[F_gold, pts_L, pts_R, pts_L_noise, pts_R_noise, X, img_size] = generate_virtual_dataset(0.5, t, a, nb_pts, noise_std, percent_outliers);
 white_img = 255 * ones(img_size(1), img_size(2), 'uint8');
 img_L = white_img;
 img_R = white_img;
@@ -13,15 +16,54 @@ img_R = white_img;
 % ground truth
 figure;
 showMatchedFeatures(img_L, img_R, pts_L_noise, pts_R_noise);
-title('Suggested Feature Points (Ground Truth)');
+title('Noisy Feature Points Matches');
+
+figure;
+subplot(2, 2, 1);
+showMatchedFeatures(img_L, img_R, pts_L_noise(nb_outliers+1:end, :), pts_R_noise(nb_outliers+1:end, :));
+title('Inliers');
+
+subplot(2, 2, 2);
+showMatchedFeatures(img_L, img_R, pts_L_noise(1:nb_outliers, :), pts_R_noise(1:nb_outliers, :));
+title('Outliers');
+
+% first estimate with real fundamental matrix
+[F, inliers] = estimateFundamentalMatrix(pts_L_noise, pts_R_noise, 'Method', 'LMedS');
+
+sum(inliers)
 
 % estimate fundamental matrix parameters from noisy points and eliminate outliers
-[F, alignment, inliers, T] = estimate_fundamental_matrix(pts_L_noise, pts_R_noise, 'Method', 'STAN', ...
+[F, alignment, inliers, T] = estimate_fundamental_matrix(pts_L_noise, pts_R_noise, 'Method', 'LMedS', ...
                                                          'Centered', 'true', 'ImgSize', size(img_L));
 
-% draw epilines on image (with points without noise)
-[img_L_epilines, img_R_epilines] = draw_epilines(img_L, img_R, F, pts_L, pts_R);
-[img_L_epilines_gold, img_R_epilines_gold] = draw_epilines(img_L, img_R, F_gold, pts_L, pts_R);
+sum(inliers)
+                                                    
+% alignment = zeros(1, 7);
+% T = eye(3);
+
+% uncaught outliers
+nb_uncaught_outliers = sum(inliers(1:nb_outliers))
+                                                     
+% filter outliers
+pts_L_inliers = pts_L(inliers, :);
+pts_R_inliers = pts_R(inliers, :);
+
+subplot(2, 2, 3);
+showMatchedFeatures(img_L, img_R, pts_L_noise(inliers, :), pts_R_noise(inliers, :));
+title('Filtered Inliers (robust method)');
+
+subplot(2, 2, 4);
+showMatchedFeatures(img_L, img_R, pts_L_noise(~inliers, :), pts_R_noise(~inliers, :));
+title('Filtered Outliers (robust method)');
+
+% display inliers/outliers 3d points
+figure;
+scatter3(X(inliers, 1), X(inliers, 2), X(inliers, 3)); hold on;
+scatter3(X(~inliers, 1), X(~inliers, 2), X(~inliers, 3)); hold off;
+                                                     
+% draw epilines on image (with points without noise chosen as inliers)
+[img_L_epilines, img_R_epilines] = draw_epilines(img_L, img_R, F, pts_L_inliers, pts_R_inliers);
+[img_L_epilines_gold, img_R_epilines_gold] = draw_epilines(img_L, img_R, F_gold, pts_L_inliers, pts_R_inliers);
 
 % rectify images with epilines
 [H, Hp] = compute_rectification(alignment, T);

@@ -16,6 +16,8 @@ end
   pts1, pts2, method, nb_trials, ...
   distance_function, distance_threshold, confidence);
 
+% [F, alignment, inliers] = guided_matching(alignment, inliers, pts1, pts2, 2*distance_threshold);
+
 if centered
   F = decenter_F(F, T);
 end
@@ -37,14 +39,16 @@ function [pts1, pts2, method, distance_function, ...,
             = parse_inputs(matched_pts1, matched_pts2, varargin)
 
 % should add LMedS, LTS, MSAC
-expectedMethods = {'RANSAC', 'MSAC', 'STAN'};
+expectedMethods = {'RANSAC', 'MSAC', 'STAN', 'LMedS'};
 expectedBoolean = {'true', 'false'};
 
-defaultMethod = 'RANSAC';
+expected_std = 1;
+
+defaultMethod = 'LMedS';
 defaultCentered = 'false';
 defaultImgSize = [-1, -1];
-defaultNbTrials = 500;
-defaultDistanceThreshold = 1.96 * 2;
+defaultNbTrials = 5000;
+defaultDistanceThreshold = sqrt(3.84*expected_std^2); % 95% inlier (see [Hartley])
 defaultConfidence = 99;
 
 p = inputParser;
@@ -152,6 +156,10 @@ else
       [inliers] = msac(pts1, pts2, nb_pts, nb_trials, ...
                        distance_threshold, confidence, ...
                        @compute_fundamental_matrix, distance_function, 7);
+    case 'LMedS'
+      [inliers] = lmeds(pts1, pts2, nb_pts, nb_trials, ...
+                       distance_threshold, confidence, ...
+                       @compute_fundamental_matrix, distance_function, 7);
   end
   
   % if no error
@@ -191,6 +199,35 @@ else
 end
 end
 
+function inliers = lmeds(pts1h, pts2h, nb_pts, nb_trials, confidence, distance_threshold, ...
+  compute_fundamental_matrix, distance_function, sample_size)
+
+inliers = false(1, nb_pts);
+bestDis = realmax('double');
+bestModel = zeros(3, 3);
+
+if nb_pts >= 2*sample_size
+  for idx = 1: nb_trials
+   [model, d, ~] = sample_model(pts1h, pts2h, nb_pts, sample_size, compute_fundamental_matrix, distance_function);
+  
+    curDis = median(d);
+    if bestDis > curDis
+      bestDis = curDis;
+      bestModel = model;
+    end
+  end
+
+  if bestDis < realmax('double')
+    d = distance_function(pts1h, bestModel, pts2h');
+    inliers = (d <= bestDis);
+  else
+    error('Not enough inliers');
+  end
+else
+  error('Not enough points');
+end
+end
+
 function F = computeTForm(points)
 points1 = points(:,:,1)';
 points2 = points(:,:,2)';
@@ -206,3 +243,128 @@ end
 function tf = checkTForm(tform)
 tf = all(isfinite(tform(:)));
 end
+
+function [best_model, best_inliers] = ransac(pts1, pts2, nb_pts, nb_trials, threshold, confidence, ...
+                                             compute_model_func, dist_func, min_nb_pts)
+
+% make sure there are enough points
+assert(nb_pts >= min_nb_pts);
+
+% no inliers at first
+best_inliers = false(1, nb_pts);
+
+max_nb_trials = nb_trials;
+cur_nb_trials = 0;
+best_nb_inliers = 0;
+
+log_one_minus_conf = log(1 - confidence);
+one_over_nb_pts = 1 / nb_pts;
+
+while cur_nb_trials < max_nb_trials
+    % compute distances with minimum number of samples
+    [~, d, sample_indices] = sample_model(pts1, pts2, nb_pts, min_nb_pts, compute_model_func, dist_func);
+
+    % find inliers
+    [cur_inliers, cur_nb_inliers] = find_inliers(d, threshold);
+
+    if cur_nb_inliers > best_nb_inliers
+        %  replace last best
+        best_nb_inliers = cur_nb_inliers;
+        best_inliers = cur_inliers;
+        best_sample_indices = sample_indices;
+
+        % Update the number of trials
+        max_nb_trials = update_nb_trials(one_over_nb_pts, log_one_minus_conf, ...
+                                         cur_nb_inliers, max_nb_trials);
+
+    end
+    cur_nb_trials = cur_nb_trials + 1;
+end
+
+assert(best_nb_inliers >= min_nb_pts);
+
+cur_nb_trials
+best_nb_inliers
+
+% get model from best inliers
+best_model = compute_model_func(pts1(:, best_inliers), pts2(:, best_inliers));
+
+end
+
+function rand_indices = unique_rand_indices(total_size, nb_indices)
+
+assert(nb_indices <= total_size);
+
+% get nb_indices random indices between 1 -> total_size
+rand_indices = randperm(total_size, nb_indices);
+
+end
+
+function [model, d, indices] = sample_model(pts1, pts2, nb_pts, min_nb_pts, compute_model_func, dist_func)
+
+% choose nb_pts unique random rows
+indices = unique_rand_indices(nb_pts, min_nb_pts);
+model = compute_model_func(pts1(:, indices), pts2(:, indices));
+d = dist_func(pts1, model, pts2');
+
+end
+
+function [inliers, nb_inliers] = find_inliers(distance, threshold)
+
+inliers = distance <= threshold;
+nb_inliers = sum(inliers);
+
+end
+
+% todo: put back 7
+function max_nb_trials = update_nb_trials(one_over_nb_pts, ...
+                                          log_one_minus_conf, ...
+                                          cur_nb_inliers, max_nb_trials)
+                                     
+ratio_of_inliers = cur_nb_inliers * one_over_nb_pts;
+if ratio_of_inliers > 1 - eps('double')
+  new_nb= 0;
+else
+  ratio = ratio_of_inliers^7;
+  if ratio > eps(1)
+    log_one_minus_ratio = log(1 - ratio);
+    new_nb = ceil(log_one_minus_conf / log_one_minus_ratio);
+  else
+    new_nb = intmax;
+  end
+end
+
+if max_nb_trials > new_nb
+  max_nb_trials = new_nb;
+end
+
+end
+
+function [F, alignment, inliers] = guided_matching(alignment, inliers, pts1, pts2, distance_threshold)
+
+nb_inliers = sum(inliers);
+last_nb_inliers = 0;
+
+pts1h = pts1;
+pts2h = pts2;
+pts1h(3, :) = 1;
+pts2h(3, :) = 1;
+
+while ~(nb_inliers == last_nb_inliers)
+
+last_nb_inliers = nb_inliers;
+
+alignment = iterative_fundamental_matrix(alignment, pts1h(:, inliers), pts2h(:, inliers));
+
+F = alignment_to_fundamental_matrix(alignment);
+d = sampson_distance(pts1h, F, pts2h');
+[inliers, nb_inliers] = find_inliers(d, distance_threshold);
+
+% nb_inliers
+
+end
+
+F = alignment_to_fundamental_matrix(alignment);
+
+end
+

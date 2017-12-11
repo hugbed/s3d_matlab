@@ -2,7 +2,7 @@ close all;
 clear variables;
 
 % load dataset images
-dataset_name = 'Arch';
+dataset_name = 'tree_frame';
 [img_L, img_R] = load_dataset_inputs(dataset_name);
 
 % load dataset feature points
@@ -15,7 +15,7 @@ showMatchedFeatures(img_L, img_R, pts_L, pts_R, 'montage');
 title('Putatively Matched Points (Including Outliers)');
 
 % estimate fundamental matrix parameters and eliminate outliers
-[F, alignment, inliers, T] = estimate_fundamental_matrix(pts_L, pts_R, 'Method', 'RANSAC', ...
+[F, alignment, inliers, T] = estimate_fundamental_matrix(pts_L, pts_R, 'Method', 'LMedS', ...
                                                          'Centered', 'true', 'ImgSize', size(img_L));
 
 % matches without outliers

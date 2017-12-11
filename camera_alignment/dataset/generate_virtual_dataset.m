@@ -1,7 +1,7 @@
-function [ F, pts_L, pts_R, pts_L_noise, pts_R_noise, img_size ] = generate_virtual_dataset(baseline, t, a, noise_std)
+function [ F, pts_L, pts_R, pts_L_noise, pts_R_noise, X_kept, img_size ] = ...
+    generate_virtual_dataset(baseline, t, a, nb_pts_kept, noise_std, percent_outliers)
 
-nb_pts = 400;
-nb_pts_kept = 200;
+nb_pts = 2*nb_pts_kept;
 
 % camera instrinsic matrix
 width = 512;
@@ -52,8 +52,8 @@ xp = xp ./ xp(3, :);
 % create noisy points with std = noise_std
 x_noise = x;
 xp_noise = xp;
-x_noise(1:2, :) = x(1:2, :) + sqrt(noise_std)*randn(nb_pts, 2)';
-xp_noise(1:2, :) = xp(1:2, :) + sqrt(noise_std)*randn(nb_pts, 2)';
+x_noise(1:2, :) = x(1:2, :) + noise_std*randn(nb_pts, 2)';
+xp_noise(1:2, :) = xp(1:2, :) + noise_std*randn(nb_pts, 2)';
 
 % filter points
 X_kept = X;
@@ -88,25 +88,40 @@ X_kept = X_kept(good, :);
 % X_kept = X_kept(good, :);
 
 % display relative transform
-figure;
-display_transform([1, 0, 0; 0, 1, 0; 0, 0, 1], [0, 0, 0]');
-display_transform(R, t);
-
-% and points
-% scatter3(X(:, 1), X(:, 2), X(:, 3)); hold on;
-figure;
-display_transform([1, 0, 0; 0, 1, 0; 0, 0, 1], [0, 0, 0]');
-display_transform(R, t);
-scatter3(X_kept(:, 1), X_kept(:, 2), X_kept(:, 3)); hold off;
+% figure;
+% display_transform([1, 0, 0; 0, 1, 0; 0, 0, 1], [0, 0, 0]');
+% display_transform(R, t);
+% 
+% % and points
+% % scatter3(X(:, 1), X(:, 2), X(:, 3)); hold on;
+% figure;
+% display_transform([1, 0, 0; 0, 1, 0; 0, 0, 1], [0, 0, 0]');
+% display_transform(R, t);
+% scatter3(X_kept(:, 1), X_kept(:, 2), X_kept(:, 3)); hold off;
 
 % figure;
 % white_img = 255 * ones(height, width, 'uint8');
 % showMatchedFeatures(white_img, white_img, x', xp');
 
-pts_L = x(1:2, 1:nb_pts_kept)';
-pts_R = xp(1:2, 1:nb_pts_kept)';
-pts_L_noise = x_noise(1:2, 1:nb_pts_kept)';
-pts_R_noise = xp_noise(1:2, 1:nb_pts_kept)';
+% add outliers
+outlier_distance_treshold = 40;
+nb_outliers = percent_outliers*nb_pts_kept;
+
+for i = 1:nb_outliers
+    outlier_noise = 2*outlier_distance_treshold*rand(2,1) - outlier_distance_treshold;
+    xp_noise(1:2, i) = x(1:2, i) + outlier_noise;    
+end
+
+% remove homogenous dimension and keep nb_pts_kept
+x = x(1:2, 1:nb_pts_kept);
+xp = xp(1:2, 1:nb_pts_kept);
+x_noise = x_noise(1:2, 1:nb_pts_kept);
+xp_noise = xp_noise(1:2, 1:nb_pts_kept);
+
+pts_L = x';
+pts_R = xp';
+pts_L_noise = x_noise';
+pts_R_noise = xp_noise';
 img_size = [height, width];
 
 end
