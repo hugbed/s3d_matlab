@@ -1,13 +1,14 @@
-function [x, P] = kalman_filter(z, x, P, sigma)
+function [x, P] = kalman_filter(z, x, P, R, sigmaQ, u)
 
-F = eye(7);
-H = eye(7);
-Q = 0.00001 * eye(7);
-R = diag(sigma);
+N = length(x);
 
-% prediction (not necessary with identity F, H, Q)
-% x = F*x;
-% P = F*P*F' + Q;
+F = eye(N);
+H = eye(N);
+Q = diag(sigmaQ);
+
+% prediction
+x = F*x + u;
+P = F*P*F' + Q;
 
 % update (innovation)
 y = z - H*x;

@@ -1,0 +1,5 @@
+Sampson Errors:
+ Estimation (mean) = 4.813868
+ Estimation (std) = 18.270109
+ Filtered Estimation (mean) = 13.128170
+ Filtered Estimation (std) = 13.156690

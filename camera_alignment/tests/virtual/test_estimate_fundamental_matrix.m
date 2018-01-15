@@ -2,21 +2,21 @@ close all;
 clear variables;
 
 % load dataset
-t = [0.1, 0.0, 0.0]';
-a = [0.1, 0.0, 0.1]'; % roll, pitch, tilt; (ZYX)
+t = [0.5, 0.0, 0.0]';
+a = [0.5, 0.0, 0.0]'; % roll, pitch, tilt; (ZYX)
 nb_pts = 200;
-noise_std = 1;
-percent_outliers = 0.2;
+noise_std = 5;
+percent_outliers = 0.5;
 nb_outliers = floor(percent_outliers*nb_pts);
-[F_gold, pts_L, pts_R, pts_L_noise, pts_R_noise, X, img_size] = generate_virtual_dataset(0.5, t, a, nb_pts, noise_std, percent_outliers);
+[F_gold, pts_L, pts_R, pts_L_noise, pts_R_noise, X, img_size] = generate_virtual_dataset(t, a, nb_pts, noise_std, percent_outliers);
 white_img = 255 * ones(img_size(1), img_size(2), 'uint8');
 img_L = white_img;
 img_R = white_img;
 
-% ground truth
-figure;
-showMatchedFeatures(img_L, img_R, pts_L_noise, pts_R_noise);
-title('Noisy Feature Points Matches');
+% % ground truth
+% figure;
+% showMatchedFeatures(img_L, img_R, pts_L_noise, pts_R_noise);
+% title('Noisy Feature Points Matches');
 
 figure;
 subplot(2, 2, 1);
@@ -28,7 +28,7 @@ showMatchedFeatures(img_L, img_R, pts_L_noise(1:nb_outliers, :), pts_R_noise(1:n
 title('Outliers');
 
 % estimate fundamental matrix parameters from noisy points and eliminate outliers
-[F, alignment, inliers, T] = estimate_fundamental_matrix(pts_L_noise, pts_R_noise, 'Method', 'LMedS', ...
+[F, alignment, inliers, T] = estimate_fundamental_matrix(pts_L_noise, pts_R_noise, 'Method', 'RANSAC', ...
                                                          'Centered', 'true', 'ImgSize', size(img_L));
 
 % uncaught outliers

@@ -42,7 +42,7 @@ function [pts1, pts2, method, distance_function, ...,
 expectedMethods = {'RANSAC', 'MSAC', 'STAN', 'LMedS'};
 expectedBoolean = {'true', 'false'};
 
-expected_std = 1;
+expected_std = 3;
 
 defaultMethod = 'LMedS';
 defaultCentered = 'false';
@@ -283,8 +283,8 @@ end
 
 assert(best_nb_inliers >= min_nb_pts);
 
-cur_nb_trials
-best_nb_inliers
+cur_nb_trials;
+best_nb_inliers;
 
 % get model from best inliers
 best_model = compute_model_func(pts1(:, best_inliers), pts2(:, best_inliers));

@@ -1,11 +1,11 @@
 function [ F, pts_L, pts_R, pts_L_noise, pts_R_noise, X_kept, img_size ] = ...
-    generate_virtual_dataset(baseline, t, a, nb_pts_kept, noise_std, percent_outliers)
+    generate_virtual_dataset(t, a, nb_pts_kept, noise_std, percent_outliers)
 
 nb_pts = 2*nb_pts_kept;
 
 % camera instrinsic matrix
 width = 512;
-height = width;
+height = 512;
 f = 703;
 field_of_view_deg = 2 * rad2deg(atan(height/2/f));
 aspect_ratio = 1.5; % it is assumed it is 1.0
@@ -87,19 +87,19 @@ X_kept = X_kept(good, :);
 % xp_noise = xp_noise(:, good);
 % X_kept = X_kept(good, :);
 
-% display relative transform
+% % display relative transform
 % figure;
-% display_transform([1, 0, 0; 0, 1, 0; 0, 0, 1], [0, 0, 0]');
-% display_transform(R, t);
+% display_transform([1, 0, 0; 0, 1, 0; 0, 0, 1], [0, 0, 0]'); hold on;
+% display_transform(R, t); hold off;
 % 
 % % and points
 % % scatter3(X(:, 1), X(:, 2), X(:, 3)); hold on;
 % figure;
-% display_transform([1, 0, 0; 0, 1, 0; 0, 0, 1], [0, 0, 0]');
+% display_transform([1, 0, 0; 0, 1, 0; 0, 0, 1], [0, 0, 0]'); hold on;
 % display_transform(R, t);
 % scatter3(X_kept(:, 1), X_kept(:, 2), X_kept(:, 3)); hold off;
 
-% figure;
+% % figure;
 % white_img = 255 * ones(height, width, 'uint8');
 % showMatchedFeatures(white_img, white_img, x', xp');
 
@@ -122,6 +122,6 @@ pts_L = x';
 pts_R = xp';
 pts_L_noise = x_noise';
 pts_R_noise = xp_noise';
-img_size = [height, width];
+img_size = [height width];
 
 end
