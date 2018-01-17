@@ -1,4 +1,4 @@
-OpenS3D - MATLAB
+# OpenS3D - MATLAB
 
 Computer Vision Drafts/Proofs of Concept for OpenS3D techniques.
 
